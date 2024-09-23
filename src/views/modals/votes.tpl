@@ -1,3 +1,8 @@
+{{{ if showEndorse }}}
+<div style="color: green;">
+    <h4>*An instructor has endorsed this post*</h4>
+</div>
+{{{ end }}}
 {{{ if showUpvotes }}}
 <div class="mb-3">
 	<h4>[[global:upvoters]] <small>({upvoteCount})</small></h4>
