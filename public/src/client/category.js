@@ -50,6 +50,11 @@ define('forum/category', [
 			},
 		});
 
+		// Add this line to initialize the topic search
+		handleTopicSearch();
+		testTopicFilter();
+		console.log("testing topic filter");
+
 		hooks.fire('action:topics.loaded', { topics: ajaxify.data.topics });
 		hooks.fire('action:category.loaded', { cid: ajaxify.data.cid });
 	};
@@ -109,6 +114,91 @@ define('forum/category', [
 			});
 
 			return false;
+		});
+	}
+
+	// Testing topic filter to search for topics with the word "test" in the title.
+	function testTopicFilter() {
+		const topicEls = $('[component="category/topic"]');
+		const searchTerm = 'test';
+
+		topicEls.each(function () {
+			const topicEl = $(this);
+			const titleEl = topicEl.find('[component="topic/header"] a');
+			const title = titleEl.text().toLowerCase();
+			const isMatch = title.indexOf(searchTerm) !== -1;
+			console.log(`Title: ${title}\n ${isMatch ? 'Hidden' : 'Visible'}\n`);
+
+			topicEl.toggleClass('hidden', !isMatch);
+		});
+
+		const visibleTopics = topicEls.filter(':not(.hidden)');
+		if (visibleTopics.length === 0) {
+			if ($('[component="category/topic/no-matches"]').length === 0) {
+				$('<div component="category/topic/no-matches" class="alert alert-info">No topics match the search term "test".</div>')
+					.insertAfter('[component="category/topic"]:last');
+			} else {
+				$('[component="category/topic/no-matches"]').removeClass('hidden');
+			}
+		} else {
+			$('[component="category/topic/no-matches"]').addClass('hidden');
+		}
+	}
+
+	// Following format from groupSearch.js, placeholder for future integration with frontend search bar
+	function handleTopicSearch() {
+		const searchEl = $('[component="category/topic/search"]');
+		if (!searchEl.length) {
+			return;
+		}
+
+		const toggleVisibility = searchEl.parent('[component="category/topic/search-container"]').length > 0;
+		const topicEls = $('[component="category/topic"]');
+
+		searchEl.on('show.bs.dropdown', function () {
+			function updateList() {
+				const val = searchEl.find('input').val().toLowerCase();
+				let noMatch = true;
+				topicEls.each(function () {
+					const topicEl = $(this);
+					const title = topicEl.find('.topic-title').text().toLowerCase();
+					const isMatch = title.indexOf(val) !== -1;
+					if (noMatch && isMatch) {
+						noMatch = false;
+					}
+
+					topicEl.toggleClass('hidden', !isMatch);
+				});
+
+				$('[component="category/topic/no-matches"]').toggleClass('hidden', !noMatch);
+			}
+
+			if (toggleVisibility) {
+				searchEl.parent().find('.dropdown-toggle').css({ visibility: 'hidden' });
+				searchEl.removeClass('hidden');
+				searchEl.css({
+					'z-index': searchEl.parent().find('.dropdown-toggle').css('z-index') + 1,
+				});
+			}
+
+			searchEl.on('click', function (ev) {
+				ev.preventDefault();
+				ev.stopPropagation();
+			});
+			searchEl.find('input').val('').on('keyup', updateList);
+			updateList();
+		});
+
+		searchEl.on('shown.bs.dropdown', function () {
+			searchEl.find('input').focus();
+		});
+
+		searchEl.on('hide.bs.dropdown', function () {
+			if (toggleVisibility) {
+				searchEl.parent().find('.dropdown-toggle').css({ visibility: 'inherit' });
+				searchEl.addClass('hidden');
+			}
+			searchEl.off('click').find('input').off('keyup');
 		});
 	}
 
