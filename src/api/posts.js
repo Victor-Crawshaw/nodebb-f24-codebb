@@ -335,6 +335,16 @@ postsAPI.getVoters = async function (caller, data) {
 		user.getUsersFields(downvoteUids, ['username', 'userslug', 'picture']),
 	]);
 
+	let hasAdminUpvoted = false;
+
+	for (const uid of upvoteUids) {
+		const isAdmin = groups.isMemberOfGroups(uid, ['administrators']);
+		if (isAdmin[0]) {
+			hasAdminUpvoted = true;
+			break; // Exit loop as soon as an admin is found
+		}
+	}
+
 	return {
 		upvoteCount: upvoters.length,
 		downvoteCount: downvoters.length,
@@ -342,6 +352,7 @@ postsAPI.getVoters = async function (caller, data) {
 		showDownvotes: showDownvotes,
 		upvoters: upvoters,
 		downvoters: downvoters,
+		showEndorse: hasAdminUpvoted,
 	};
 };
 
