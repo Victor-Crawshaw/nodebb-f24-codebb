@@ -337,13 +337,13 @@ postsAPI.getVoters = async function (caller, data) {
 
 	let hasAdminUpvoted = false;
 
-    for (const uid of upvoteUids) {
-        const isAdmin = await groups.isMemberOfGroups(uid, ['administrators']);
-        if (isAdmin[0]) {
-            hasAdminUpvoted = true;
-            break; // Exit loop as soon as an admin is found
-        }
-    }
+	for (const uid of upvoteUids) {
+		const isAdmin = groups.isMemberOfGroups(uid, ['administrators']);
+		if (isAdmin[0]) {
+			hasAdminUpvoted = true;
+			break; // Exit loop as soon as an admin is found
+		}
+	}
 
 	return {
 		upvoteCount: upvoters.length,
