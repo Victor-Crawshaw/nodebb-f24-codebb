@@ -1,6 +1,6 @@
 {{{ if showEndorse }}}
 <div style="color: green;">
-    <h4>*An instructor has endorsed this post*</h4>
+    <h3>*An instructor has endorsed this post*</h3>
 </div>
 {{{ end }}}
 {{{ if showUpvotes }}}
