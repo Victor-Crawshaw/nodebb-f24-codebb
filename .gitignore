@@ -73,3 +73,6 @@ test.sh
 
 .docker/**
 !**/.gitkeep
+
+# Dump
+dump.rdb

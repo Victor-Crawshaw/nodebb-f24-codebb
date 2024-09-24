@@ -50,6 +50,8 @@ define('forum/category', [
 			},
 		});
 
+		handleTopicSearch();
+
 		hooks.fire('action:topics.loaded', { topics: ajaxify.data.topics });
 		hooks.fire('action:category.loaded', { cid: ajaxify.data.cid });
 	};
@@ -109,6 +111,41 @@ define('forum/category', [
 			});
 
 			return false;
+		});
+	}
+
+	// Search for topics in the category based on the search term.
+	function handleTopicSearch() {
+		const searchEl = $('[component="topic-search"]');
+		const topicEls = $('[component="category/topic"]');
+
+		if (!searchEl.length) {
+			return;
+		}
+
+		searchEl.on('keyup', function () {
+			const searchTerm = searchEl.val().toLowerCase();
+			topicEls.each(function () {
+				const topicEl = $(this);
+				const titleEl = topicEl.find('[component="topic/header"] a');
+				const title = titleEl.text().toLowerCase();
+				const isMatch = title.indexOf(searchTerm) !== -1;
+				console.log(`Title: ${title}\n ${isMatch ? 'Hidden' : 'Visible'}\n`);
+
+				topicEl.toggleClass('hidden', !isMatch);
+			});
+
+			const visibleTopics = topicEls.filter(':not(.hidden)');
+			if (visibleTopics.length === 0) {
+				if ($('[component="category/topic/no-matches"]').length === 0) {
+					$(`<div component="category/topic/no-matches" class="alert alert-info">No topics match the search term ${searchTerm}.</div>`)
+						.insertAfter('[component="category/topic"]:last');
+				} else {
+					$('[component="category/topic/no-matches"]').removeClass('hidden');
+				}
+			} else {
+				$('[component="category/topic/no-matches"]').addClass('hidden');
+			}
 		});
 	}
 
